@@ -426,7 +426,7 @@ void menu() {
     } while (opcao != 0);
 }
 
-
+/*classe principa */
 int main() {
     setlocale(LC_ALL,"");
     menu();
