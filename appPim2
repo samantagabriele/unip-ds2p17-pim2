@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <windows.h>
 
 // Definições de limite
 #define MAX_LIVROS 100
@@ -40,16 +41,27 @@ void limparTela() {
     #endif
 }
 
-void pausar() {
-    printf("Pressione Enter para continuar...");
-    getchar();  // Espera por um Enter (captura a nova linha)
-}
-
-// Função para ocultar a senha durante a digitação
 void ocultarSenha(char *senha) {
     int i = 0;
     char ch;
-    senha[i] = '\0';  // Termina a string da senha
+
+    while ((ch = _getch()) != '\r') {  // Loop até pressionar Enter
+        if (ch == '\b' && i > 0) {     // Verifica se o usuário pressionou Backspace
+            printf("\b \b");           // Remove o último caractere da tela
+            i--;
+        } else if (ch != '\b') {       // Adiciona o caractere à senha
+            senha[i] = ch;
+            printf("*");               // Exibe um asterisco em vez do caractere
+            i++;
+        }
+    }
+
+    senha[i] = '\0';  // Finaliza a string
+}
+
+void pausar() {
+    printf("Pressione Enter para continuar...");
+    getchar();  // Espera por um Enter (captura a nova linha)
 }
 
 // Estruturas de dados
@@ -136,11 +148,20 @@ void cadastrarColaborador() {
             return;
         }
 
+        // Verifica se todos os caracteres são numéricos
+    for (int i = 0; i < 4; i++) {
+        if (!isdigit(colaborador.senha[i])) {
+         printf("\n\nA senha deve conter apenas números. Tente novamente!\n");
+         aguardar();
+        return;
+    }
+}
+
         // Registra a data e a hora de criação
         colaborador.dataCriacao = time(NULL);
 
         colaboradores[numColaboradores++] = colaborador;   
-        printf("\nColaborador cadastrado com sucesso!\n");
+        printf("\n\nColaborador cadastrado com sucesso!\n");
         
         // Exibe a data e hora de criação
         char buffer[26];
