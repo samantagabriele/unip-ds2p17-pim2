@@ -3,15 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-//Inicio Me remova por favor
-#ifdef _WIN32
-#include <windows.h>  // Para Windows
-#else
-#include <termios.h>  // Para Linux/Unix/macOS
-#include <unistd.h>
-#endif
-//FIM Me remova por favor
-
 // Definições de limite
 #define MAX_LIVROS 100
 #define MAX_BIBLIOTECARIOS 10
@@ -58,41 +49,6 @@ void pausar() {
 void ocultarSenha(char *senha) {
     int i = 0;
     char ch;
-
-//Inicio Me remova por favor
-    #ifdef _WIN32  // Para sistemas Windows
-        while ((ch = _getch()) != '\r') {
-            if (ch == '\b' && i > 0) {
-                printf("\b \b");
-                i--;
-            } else if (ch != '\b') {
-                senha[i] = ch;
-                printf("*");
-                i++;
-            }
-        }
-
-    #else  // Para sistemas Unix/Linux/macOS
-        struct termios oldt, newt;
-        tcgetattr(STDIN_FILENO, &oldt);            // Obtém os parâmetros atuais do terminal
-        newt = oldt;
-        newt.c_lflag &= ~(ECHO);                   // Desabilita o echo dos caracteres
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);   // Aplica as novas configurações imediatamente
-
-        while ((ch = getchar()) != '\n') {         // Digita a senha
-            if (ch == '\b' && i > 0) {             // Backspace para apagar
-                printf("\b \b");
-                i--;
-            } else {
-                senha[i] = ch;
-                printf("*");
-                i++;
-            }
-        }
-
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);   // Restaura as configurações antigas
-    #endif
-//FIM Me remova por favor
     senha[i] = '\0';  // Termina a string da senha
 }
 
