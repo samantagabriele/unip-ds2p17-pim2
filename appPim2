@@ -342,6 +342,8 @@ void aguardar() {
 // Função de Login para Usuário
 int loginColaborador() {
     char nome[50], senha[20];
+    int usuarioEncontrado = 0;  // Variável para marcar se o usuário foi encontrado
+
     printf("Digite seu nome de usuário: ");
     scanf(" %[^\n]", nome);
     getchar();  // Limpa o caractere '\n' do buffer
@@ -349,16 +351,28 @@ int loginColaborador() {
     ocultarSenha(senha);  // Oculta a senha ao digitar
 
     for (int i = 0; i < numColaboradores; i++) {
-        if (strcmp(colaboradores[i].nome, nome) == 0 && strcmp(colaboradores[i].senha, senha) == 0) {
-            printf("\n\nLogin realizado com sucesso!\n");
-            aguardar();
-            return 1; // Login válido
+        if (strcmp(colaboradores[i].nome, nome) == 0) {
+            usuarioEncontrado = 1;  // Usuário encontrado
+            if (strcmp(colaboradores[i].senha, senha) == 0) {
+                printf("\n\nLogin realizado com sucesso!\n");
+                aguardar();
+                return 1; // Login válido
+            } else {
+                printf("\n\nSenha incorreta!\n");
+                aguardar();
+                return 0; // Senha incorreta
+            }
         }
     }
-    printf("\n\nNome de usuário ou senha inválidos!\n");
+
+    if (!usuarioEncontrado) {
+        printf("\n\nUsuário não encontrado!\n");
+    }
+    
     aguardar();
     return 0; // Login inválido
 }
+
 
 // Função de Login para Administrador
 int loginAdmin() {
@@ -397,13 +411,41 @@ void gerarRelatorio() {
     
 }
 
+//Função para gerar o relatório dos Bibliotecarios. 
 void gerarRelatorioBibliotecario() {
-    printf("Relatorio de todos os registros:\n\n");
+    printf("Relatório de todos os registros:\n\n");
 
+    // Exibe os livros e clientes como de costume
     exibirLivrosAtualizar();
+    system("pause");
     exibirClientesAtualizar();
+
+    // Verifica se há registros de alterações
+    if (numLogs == 0) {
+        printf("\nNenhuma alteração registrada.\n");
+    } else {
+        // Exibe o histórico de alterações com datas e horas
+        printf("\nHistórico de Alterações:\n\n");
+
+        for (int i = 0; i < numLogs; i++) {
+            // Converte o tempo para uma string legível
+            char buffer[26];
+            struct tm* tm_info;
+
+            tm_info = localtime(&logs[i].dataAlteracao);
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);  // Formato de data e hora
+
+            // Exibe os detalhes da alteração
+            printf("Colaborador: %s\n", logs[i].colaborador);
+            printf("Ação: %s\n", logs[i].acao);
+            printf("Data/Hora: %s\n", buffer);
+            printf("********************************************************\n");
+        }
+    }
+
     system("pause");
 }
+
 
 void exibirRelatorioAdm() {
     printf("Relatório de alterações dos usuários:\n\n");
@@ -426,8 +468,6 @@ void exibirRelatorioAdm() {
 
     system("pause");
 }
-
-// Função para escolher entre Admin ou Usuário
 void menuLogin() {
     int opcao;
     do {
@@ -439,59 +479,137 @@ void menuLogin() {
         printf("2. Entrar como Usuário\n");
         printf("0. Sair\n\n");
         printf("Escolha uma opção: ");
-        scanf("%d", &opcao);
+
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nOpção inválida! Por favor, insira um número entre 0 e 2.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            continue;
+        }
 
         switch (opcao) {
             case 1:
-              limparTela();
+                limparTela();
                 if (loginAdmin()) {
-                    int escolha;
-                    do {
-                        limparTela();
-                        printf("Menu do Administrador:\n\n");
-                        printf("1. Cadastrar Colaborador\n");
-                        printf("2. Exibir Colaboradores\n");
-                        printf("3. Atualizar Colaborador\n");
-                        printf("4. Deletar Colaborador\n");
-                        printf("5. Gerar Relatório\n");
-                        printf("0. Deslogar\n\n");
-                        printf("Escolha uma opção: ");
-                        scanf("%d", &escolha);
-                        limparTela();
-
-                        if (escolha == 1) {
-                            cadastrarColaborador();
-                        } else if (escolha == 2) {
-                            exibirColaboradores();
-                        } else if (escolha == 3) {
-                            atualizarColaborador();
-                        } else if (escolha == 4){
-                            deletarColaborador();
-                        }  else if (escolha == 5){
-                            exibirRelatorioAdm();
-                        }else if (escolha != 1 && escolha != 2 && escolha != 3 && escolha != 4 && escolha != 0) {
-                            printf("\nEscolha incorreta!\n");
-                            aguardar();
-                        }
-                    } while (escolha != 0);
+                    menuAdm();
                 }
                 break;
             case 2:
                 limparTela();
                 if (loginColaborador()) {
-                    // Acessa o menu de usuário
-                    menu(); 
+                    menu(); // Acessa o menu de usuário
                 }
                 break;
             case 0:
                 printf("Saindo...\n");
                 break;
             default:
-                printf("\nOpção inválida!\n");
+                printf("\nOpção inválida! Por favor, insira um número entre 0 e 2.\n");
                 aguardar();
         }
     } while (opcao != 0);
 }
+
+void menuAdm() {
+    int escolha;
+    do {
+        limparTela();
+        printf("Menu do Administrador:\n\n");
+        printf("1. Cadastrar Colaborador\n");
+        printf("2. Exibir Colaboradores\n");
+        printf("3. Atualizar Colaborador\n");
+        printf("4. Deletar Colaborador\n");
+        printf("5. Gerar Relatório\n");
+        printf("0. Deslogar\n\n");
+        printf("Escolha uma opção: ");
+
+        if (scanf("%d", &escolha) != 1) {
+            printf("\nEscolha incorreta! Por favor, insira um número entre 0 e 5.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            continue;
+        }
+
+        limparTela();
+
+        switch (escolha) {
+            case 1:
+                cadastrarColaborador();
+                break;
+            case 2:
+                exibirColaboradores();
+                break;
+            case 3:
+                atualizarColaborador();
+                break;
+            case 4:
+                deletarColaborador();
+                break;
+            case 5:
+                exibirRelatorioAdm();
+                break;
+            case 0:
+                break; // Volta ao menu anterior
+            default:
+                printf("\nEscolha incorreta! Por favor, insira um número entre 0 e 5.\n");
+                aguardar();
+        }
+    } while (escolha != 0);
+}
+
+// Menu principal do usuário
+void menu() {
+    int opcao;
+    do {
+        limparTela();
+        printf("********************************************\n");
+        printf("*            Sistema de Biblioteca         *\n");
+        printf("********************************************\n\n");
+        printf("1. Menu Bibliotecário\n");
+        printf("2. Menu Cliente\n");
+        printf("3. Menu Livro\n");
+        printf("4. Emprestar Livro\n");
+        printf("5. Devolver Livro\n");
+        printf("6. Gerar Relatório\n");
+        printf("0. Sair\n");
+        printf("\nEscolha uma opção: ");
+
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nOpção inválida! Por favor, insira um número entre 0 e 6.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            menu();
+        }
+
+        switch (opcao) {
+            case 1:
+                menuBibliotecario();
+                break;
+            case 2:
+                menuCliente();
+                break;
+            case 3:
+                menuLivro();
+                break;
+            case 4:
+                emprestarLivro();
+                break;
+            case 5:
+                devolverLivro();
+                break;
+            case 6:
+                gerarRelatorioBibliotecario();
+                break;
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção inválida!\n");
+                aguardar();
+        }
+    } while (opcao != 0);
+}
+
 
 // Funções de CRUD para Bibliotecário
 void cadastrarBibliotecario() {
@@ -648,15 +766,48 @@ void cadastrarLivro() {
 }
    
 void exibirLivros() {
-
     limparTela();
-    printf("Livros cadastrados:\n\n");
+    
+    int opcao;
+    char termoBusca[100];
+    printf("Escolha uma opção de filtro:\n");
+    printf("1. Título:\n");
+    printf("2. Autor:\n");
+    printf("3. Disponibilidade:\n");
+    printf("4. Sem Filtro\n");
+    printf("\nDigite sua opção: ");
+    scanf("%d", &opcao);
+    
+    if (opcao != 4) {
+        printf("Digite o termo de busca: ");
+        scanf(" %[^\n]", termoBusca);
+    }
+    
+    printf("\nLivros cadastrados:\n\n");
     for (int i = 0; i < numLivros; i++) {
-        printf("ID: %d | Título: %s | Autor: %s | Disponível: %s\n", 
-            livros[i].id, livros[i].titulo, livros[i].autor, livros[i].disponivel ? "Sim" : "Não");
+        int exibir = 1;
+        switch(opcao) {
+            case 1:
+                if (strstr(livros[i].titulo, termoBusca) == NULL) exibir = 0;
+                break;
+            case 2:
+                if (strstr(livros[i].autor, termoBusca) == NULL) exibir = 0;
+                break;
+            case 3:
+                if ((strcmp(termoBusca, "Sim") == 0 && !livros[i].disponivel) ||
+                    (strcmp(termoBusca, "Não") == 0 && livros[i].disponivel)) exibir = 0;
+                break;
+            default:
+                break;
+        }
+        if (exibir) {
+            printf("ID: %d | Título: %s | Autor: %s | Disponível: %s\n", 
+                livros[i].id, livros[i].titulo, livros[i].autor, livros[i].disponivel ? "Sim" : "Não");
+        }
     }
     system("pause");
 }
+
 
 void exibirLivrosAtualizar() {
 
@@ -755,66 +906,47 @@ void emprestarLivro() {
 
 void devolverLivro() {
     limparTela();
-    exibirLivrosRetirar();
+    exibirLivrosRetirar();  // Exibe os livros retirados e seus IDs de empréstimo
     int idEmprestimo;
-    printf("\nDigite o ID do Empréstimo para devolução: ");
-    scanf("%d", &idEmprestimo);
+    int tentativaValida = 0;  // Variável para controlar se a tentativa foi válida
 
-    if (idEmprestimo > 0 && idEmprestimo <= numEmprestimos) {
-        Emprestimo emp = emprestimos[idEmprestimo - 1];
-        time_t agora = time(NULL);
-        double diasPassados = difftime(agora, emp.dataEmprestimo) / (60 * 60 * 24);
-        
-        // Calcular multa por atraso
-        if (diasPassados > DIAS_LIMITE) {
-            double multa = (diasPassados - DIAS_LIMITE) * valorMultaPorDia;
-            printf("\nLivro devolvido com atraso. Multa de R$ %.2f\n", multa);
-        } else {
-            printf("\nLivro devolvido no prazo.\n");
+    do {
+        printf("\nDigite o ID do Empréstimo para devolução (veja a lista acima): ");
+        if (scanf("%d", &idEmprestimo) != 1) {
+            printf("\nEntrada inválida! Por favor, insira um número válido.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            continue;
         }
-        
-        // Marca o livro como disponível novamente
-        livros[emp.idLivro - 1].disponivel = 1;
-        printf("\nDevolução registrada com sucesso!\n");
-    } else {
-        printf("\nEmpréstimo não encontrado.\n");
-    }
+
+        if (idEmprestimo > 0 && idEmprestimo <= numEmprestimos) {
+            Emprestimo emp = emprestimos[idEmprestimo - 1];
+            time_t agora = time(NULL);
+            double diasPassados = difftime(agora, emp.dataEmprestimo) / (60 * 60 * 24);
+
+            // Calcular multa por atraso
+            if (diasPassados > DIAS_LIMITE) {
+                double multa = (diasPassados - DIAS_LIMITE) * valorMultaPorDia;
+                printf("\nLivro devolvido com atraso. Multa de R$ %.2f\n", multa);
+            } else {
+                printf("\nLivro devolvido no prazo.\n");
+            }
+
+            // Marca o livro como disponível novamente
+            livros[emp.idLivro - 1].disponivel = 1;
+            printf("\nDevolução registrada com sucesso!\n");
+            tentativaValida = 1;  // Marcar tentativa como válida
+        } else {
+            // Mensagem informativa quando o ID do empréstimo é inválido
+            printf("\nEmpréstimo não encontrado. Verifique o ID do empréstimo na lista acima e tente novamente.\n");
+            printf("Dica: O ID do empréstimo está associado ao livro que você retirou. Verifique o ID ao lado do livro listado.\n");
+        }
+    } while (!tentativaValida);  // Continua até que uma tentativa válida seja feita
+
     aguardar();
 }
 
-// Menu principal do usuário
-void menu() {
-    int opcao;
-    do {
-        limparTela();
-        printf("********************************************\n");
-        printf("*            Sistema de Biblioteca         *\n");
-        printf("********************************************\n\n");
-        printf("1. Menu Bibliotecário\n");
-        printf("2. Menu Cliente\n");
-        printf("3. Menu Livro\n");
-        printf("4. Emprestar Livro\n");
-        printf("5. Devolver Livro\n");
-        printf("6. Gerar Relatório\n");
-        printf("0. Sair\n");
-        printf("\nEscolha uma opção: ");
-        scanf("%d", &opcao);
 
-        switch (opcao) {
-            case 1: menuBibliotecario(); break;
-            case 2: menuCliente(); break;
-            case 3: menuLivro(); break;
-            case 4: emprestarLivro(); break;
-            case 5: devolverLivro(); break;
-            case 6: gerarRelatorioBibliotecario(); break;
-            
-            case 0: printf("Saindo...\n"); break;
-            default: printf("Opção inválida!\n");
-        }
-    } while (opcao != 0);
-}
-
-// Submenus de cada entidade
+//Menu dos bibliotecarios. 
 void menuBibliotecario() {
     int opcao;
     do {
@@ -826,20 +958,37 @@ void menuBibliotecario() {
         printf("4. Deletar Bibliotecário\n");
         printf("0. Voltar\n\n");
         printf("Escolha uma opção: ");
-        scanf("%d", &opcao);
-        
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nOpção inválida! Por favor, insira um número entre 0 e 4.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            continue;
+        }
+
         switch (opcao) {
-            case 1: 
-            limparTela();
-            cadastrarBibliotecario(); break;
-            case 2: exibirBibliotecarios(); break;
-            case 3: atualizarBibliotecario(); break;
-            case 4: deletarBibliotecario(); break;
-            case 0: break;
-            default: printf("Opção inválida!\n");
+            case 1:
+                limparTela();
+                cadastrarBibliotecario();
+                break;
+            case 2:
+                exibirBibliotecarios();
+                break;
+            case 3:
+                atualizarBibliotecario();
+                break;
+            case 4:
+                deletarBibliotecario();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opção inválida!\n");
+                aguardar();
         }
     } while (opcao != 0);
 }
+
+
 //função menu de clientes
 void menuCliente() {
     int opcao;
@@ -852,20 +1001,37 @@ void menuCliente() {
         printf("4. Deletar Cliente\n");
         printf("0. Voltar\n");
         printf("Escolha uma opção: ");
-        scanf("%d", &opcao);
-        
+
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nOpção inválida! Por favor, insira um número entre 0 e 4.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            continue;
+        }
+
         switch (opcao) {
-            case 1: 
-            limparTela();
-            cadastrarCliente(); break;
-            case 2: exibirClientes(); break;
-            case 3: atualizarCliente(); break;
-            case 4: deletarCliente(); break;
-            case 0: break;
-            default: printf("Opção inválida!\n");
+            case 1:
+                limparTela();
+                cadastrarCliente();
+                break;
+            case 2:
+                exibirClientes();
+                break;
+            case 3:
+                atualizarCliente();
+                break;
+            case 4:
+                deletarCliente();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opção inválida!\n");
+                aguardar();
         }
     } while (opcao != 0);
 }
+
 
 //Função meu livro
 void menuLivro() {
@@ -879,21 +1045,37 @@ void menuLivro() {
         printf("4. Deletar Livro\n");
         printf("0. Voltar\n");
         printf("\nEscolha uma opção: ");
-        scanf("%d", &opcao);
-        
-        switch (opcao) {
-            case 1: 
-            limparTela();
-            cadastrarLivro(); break;
-            case 2: exibirLivros(); break;
-            case 3: atualizarLivro(); break;
-            case 4: deletarLivro(); break;
-            case 0: break;
 
-            default: printf("Opção inválida!\n");
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nOpção inválida! Por favor, insira um número entre 0 e 4.\n");
+            while (getchar() != '\n'); // Limpa o buffer de entrada
+            aguardar();
+            continue;
+        }
+
+        switch (opcao) {
+            case 1:
+                limparTela();
+                cadastrarLivro();
+                break;
+            case 2:
+                exibirLivros();
+                break;
+            case 3:
+                atualizarLivro();
+                break;
+            case 4:
+                deletarLivro();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opção inválida!\n");
+                aguardar();
         }
     } while (opcao != 0);
 }
+
 
 // Função principal
 int main() {
