@@ -386,14 +386,20 @@ int loginAdmin() {
     printf("Digite a senha: ");
     ocultarSenha(senha);
 
-    if (strcmp(nome, adminNome) == 0 && strcmp(senha, adminSenha) == 0) {
+ if (strcmp(nome, adminNome) == 0) {
+    if (strcmp(senha, adminSenha) == 0) {
         esperarTecla();
         return 1;
     } else {
-        printf("\nNome de usuário ou senha de administrador inválidos, tente novamente!\n");
+        printf("\nSenha incorreta, tente novamente!\n");
         aguardar();
         return 0;
     }
+} else {
+    printf("\nUsuário não encontrado, tente novamente!\n");
+    aguardar();
+    return 0;
+}
 }
 
 //função pra esperar a tecla.
