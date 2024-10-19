@@ -679,7 +679,7 @@ void exibirBibliotecariosAtualizar() {
 }
 
 
-// Função para atualizar bibliotecário
+
 // Função para atualizar bibliotecário
 void atualizarBibliotecario() {
     exibirBibliotecariosAtualizar();  // Exibe lista de bibliotecários para atualização
