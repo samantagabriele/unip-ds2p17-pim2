@@ -32,6 +32,78 @@ void menuLivro();
 void emprestarLivro();
 void devolverLivro();
 
+// Estruturas de dados
+typedef struct {
+    int id;
+    char nome[50];
+    char senha[20];
+    time_t dataCriacao;
+} Colaborador;
+
+typedef struct {
+    int id;
+    char nome[50];
+    time_t dataCriacao;  
+    time_t dataAtualizacao;
+} Bibliotecario;
+
+typedef struct {
+    int id;
+    char nome[50];
+    time_t dataCriacao;
+    time_t dataAtualizacao;
+} Cliente;
+
+typedef struct {
+    int id;
+    char titulo[100];
+    char autor[50];
+    int disponivel;
+    time_t dataCriacao;
+    time_t dataAtualizacao;
+} Livro;
+
+typedef struct {
+    int id;
+    int idCliente;
+    int idLivro;
+    time_t dataEmprestimo;
+    time_t dataDevolucaoPrevista;
+} Emprestimo;
+
+typedef struct {
+    char colaborador[50];
+    char senha[50]; // Armazene a senha de forma segura em produção!
+    char acao[100]; // Descrição da ação realizada
+    char delete[100]; //Deletaq o usuário
+    time_t dataAlteracao; // Data e hora da alteração
+    int idRegistro;
+} LogAlteracao;
+
+
+// Variáveis globais
+Bibliotecario bibliotecarios[MAX_BIBLIOTECARIOS];
+Cliente clientes[MAX_CLIENTES];
+Livro livros[MAX_LIVROS];
+Emprestimo emprestimos[MAX_EMPRESTIMOS];
+Colaborador colaboradores[MAX_COLABORADORES];
+LogAlteracao logs[MAX_LOGS];
+
+
+int numLogs = 0; 
+int numBibliotecarios = 0;
+int numClientes = 0;
+int numLivros = 0;
+int numEmprestimos = 0;
+int numColaboradores = 0;
+float valorMultaPorDia = 0.50;
+int proximoId = 1;
+int proximoIdBibliotecario = 1;
+int proximoIdCliente = 1;
+int proximoIdLivro  = 1;
+int proximoIdEmprestimo = 1;
+
+
 // Função para limpar a tela
 void limparTela() {
     #ifdef _WIN32
@@ -64,119 +136,56 @@ void pausar() {
     getchar();  // Espera por um Enter (captura a nova linha)
 }
 
-// Estruturas de dados
-typedef struct {
-    int id;
-    char nome[50];
-    char senha[20];
-    time_t dataCriacao;
-} Colaborador;
-
-typedef struct {
-    int id;
-    char nome[50];
-} Bibliotecario;
-
-typedef struct {
-    int id;
-    char nome[50];
-} Cliente;
-
-typedef struct {
-    int id;
-    char titulo[100];
-    char autor[50];
-    int disponivel;
-} Livro;
-
-typedef struct {
-    int id;
-    int idCliente;
-    int idLivro;
-    time_t dataEmprestimo;
-    time_t dataDevolucaoPrevista;
-} Emprestimo;
-
-typedef struct {
-    char colaborador[50];
-    char senha[50]; // Armazene a senha de forma segura em produção!
-    char acao[100]; // Descrição da ação realizada
-    char delete[100]; //Deletaq o usuário
-    time_t dataAlteracao; // Data e hora da alteração
-} LogAlteracao;
-
-
-// Variáveis globais
-Bibliotecario bibliotecarios[MAX_BIBLIOTECARIOS];
-Cliente clientes[MAX_CLIENTES];
-Livro livros[MAX_LIVROS];
-Emprestimo emprestimos[MAX_EMPRESTIMOS];
-Colaborador colaboradores[MAX_COLABORADORES];
-LogAlteracao logs[MAX_LOGS];
-
-int numLogs = 0; 
-int numBibliotecarios = 0;
-int numClientes = 0;
-int numLivros = 0;
-int numEmprestimos = 0;
-int numColaboradores = 0;
-float valorMultaPorDia = 0.50;
 
 // Funções de Cadastro de Colaborador (para Admin)
 void cadastrarColaborador() {
     limparTela();
     if (numColaboradores < MAX_COLABORADORES) {
         Colaborador colaborador;
-        colaborador.id = numColaboradores + 1;
+        colaborador.id = proximoId++; // Atribui o próximo ID disponível e incrementa o contador
+
         printf("Nome do Colaborador: ");
         scanf(" %[^\n]", colaborador.nome);
         getchar();  // Limpa o caractere '\n' do buffer
+
         printf("Insira uma senha de 4 dígitos para o usuário: ");
         ocultarSenha(colaborador.senha);  // Oculta a digitação da senha
 
-
         // Verifica se a senha está vazia.
         if (colaborador.senha[0] == '\0') {
-            printf("\nEsse campo não pode estar vazio \n");
+            printf("\n\nEsse campo não pode estar vazio \n");
             aguardar();
             return;
         }
-        // Verifica se a quantidaded de caracteres inseridas é maior que 4 (valor minimo).
+
+        // Verifica se a quantidade de caracteres inseridos é maior que 4 (valor mínimo).
         if (strlen(colaborador.senha) != 4) {
-            printf("\nA quantidadede de caracteres tem que ser 4, tente novamente!");
+            printf("\nA quantidade de caracteres tem que ser 4, tente novamente!");
             aguardar();
             return;
         }
 
         // Verifica se todos os caracteres são numéricos
-    for (int i = 0; i < 4; i++) {
-        if (!isdigit(colaborador.senha[i])) {
-         printf("\n\nA senha deve conter apenas números. Tente novamente!\n");
-         aguardar();
-        return;
-    }
-}
+        for (int i = 0; i < 4; i++) {
+            if (!isdigit(colaborador.senha[i])) {
+                printf("\n\nA senha deve conter apenas números. Tente novamente!\n");
+                aguardar();
+                return;
+            }
+        }
 
-        // Registra a data e a hora de criação
-        colaborador.dataCriacao = time(NULL);
+        // Adiciona a data e hora de criação do colaborador
+        time(&colaborador.dataCriacao);
 
-        colaboradores[numColaboradores++] = colaborador;   
+        // Adiciona o novo colaborador ao array
+        colaboradores[numColaboradores++] = colaborador;
+
         printf("\n\nColaborador cadastrado com sucesso!\n");
-        
-        // Exibe a data e hora de criação
-        char buffer[26];
-        struct tm* tm_info;
-        tm_info = localtime(&colaborador.dataCriacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
-        printf("\nData de Criação: %s\n", buffer);
-
-        system("pause");
     } else {
-        printf("Limite de colaboradores atingido!\n");
+        printf("\n\nNúmero máximo de colaboradores atingido!\n");
     }
-    limparTela();
+    aguardar();
 }
-
 
 void registrarAlteracao(char nome[], char novaSenha[], const char* acao) {
     if (numLogs < MAX_LOGS) {
@@ -187,7 +196,7 @@ void registrarAlteracao(char nome[], char novaSenha[], const char* acao) {
         logs[numLogs].dataAlteracao = time(NULL); // Registra o horário atual
         numLogs++;
     } else {
-        printf("Limite de logs atingido!\n");
+        printf("\n\nLimite de logs atingido!\n");
     }
 }
 
@@ -296,40 +305,40 @@ void atualizarColaborador() {
     aguardar();
 }
 
+//Função responsável por deletar os colaboradores.
+void deletarColaborador() {
+    exibirColaboradoresAtualizar(); // Exibe os colaboradores
 
-
-void deletarColaborador(){
-    exibirColaboradoresAtualizar(); //exibe os colaboradores.
     int id;
-
     printf("\nDigite o ID do colaborador que deseja deletar (0 para cancelar): ");
     scanf("%d", &id);
 
     if (id > 0 && id <= numColaboradores) {
         char nomeDeletado[50];
-        strcpy(nomeDeletado, colaboradores[id -1].nome); //Armazena o colaborador a ser deletado
+        strcpy(nomeDeletado, colaboradores[id - 1].nome); // Armazena o colaborador a ser deletado
 
-        //Desloca todos os colaboradores após o ID para a esquerda
-        for (int i = id -1; i < numColaboradores - 1; i++) {
+        // Desloca todos os colaboradores após o ID para a esquerda
+        for (int i = id - 1; i < numColaboradores - 1; i++) {
             colaboradores[i] = colaboradores[i + 1];
         }
+        numColaboradores--; // Decrementa o número de colaboradores
 
-        numColaboradores --; //Decrementa o número de colaboradores
+        // Registra a alteração nos logs
+        time_t agora;
+        time(&agora);
+        char horaDeletado[26];
+        strftime(horaDeletado, sizeof(horaDeletado), "%Y-%m-%d %H:%M:%S", localtime(&agora));
 
-        //Registra a alteração nos logs
-        char acao[100];
-        snprintf(acao, sizeof(acao), "'%s' deletado \n",nomeDeletado);
-        registrarAlteracao(nomeDeletado, "", acao); //Registra a ação de deletar
+        char acao[150];
+        snprintf(acao, sizeof(acao), "'%s' deletado em %s\n", nomeDeletado, horaDeletado);
+        registrarAlteracao(nomeDeletado, "", acao); // Registra a ação de deletar
 
         printf("\nColaborador deletado com sucesso!\n");
-
-
     } else {
-        printf("Colaborador não encontrado! \n");
+        printf("Colaborador não encontrado!\n");
     }
 
     aguardar();
-
 }
 
 
@@ -343,7 +352,6 @@ void aguardar() {
 int loginColaborador() {
     char nome[50], senha[20];
     int usuarioEncontrado = 0;  // Variável para marcar se o usuário foi encontrado
-
     printf("Digite seu nome de usuário: ");
     scanf(" %[^\n]", nome);
     getchar();  // Limpa o caractere '\n' do buffer
@@ -354,7 +362,16 @@ int loginColaborador() {
         if (strcmp(colaboradores[i].nome, nome) == 0) {
             usuarioEncontrado = 1;  // Usuário encontrado
             if (strcmp(colaboradores[i].senha, senha) == 0) {
-                printf("\n\nLogin realizado com sucesso!\n");
+                // Registra a data e hora de autenticação
+                time_t agora = time(NULL);
+                char buffer[26];
+                struct tm* tm_info;
+                tm_info = localtime(&agora);
+                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+
+                printf("\n\nLogin realizado com sucesso!\n\n");
+                printf("Data e Hora de Autenticação: %s\n", buffer);
+
                 aguardar();
                 return 1; // Login válido
             } else {
@@ -391,12 +408,12 @@ int loginAdmin() {
         esperarTecla();
         return 1;
     } else {
-        printf("\nSenha incorreta, tente novamente!\n");
+        printf("\n\nSenha incorreta, tente novamente!\n");
         aguardar();
         return 0;
     }
 } else {
-    printf("\nUsuário não encontrado, tente novamente!\n");
+    printf("\n\nUsuário não encontrado, tente novamente!\n");
     aguardar();
     return 0;
 }
@@ -411,7 +428,6 @@ void esperarTecla() {
 
 void gerarRelatorio() {
     printf("Relatorio de todos os registros:\n");
-    exibirColaboradores();
     exibirLivros();
     exibirClientes();
     
@@ -421,10 +437,11 @@ void gerarRelatorio() {
 void gerarRelatorioBibliotecario() {
     printf("Relatório de todos os registros:\n\n");
 
-    // Exibe os livros e clientes como de costume
-    exibirLivrosAtualizar();
-    system("pause");
-    exibirClientesAtualizar();
+    exibirBibliotecarios();
+    exibirClientes();
+    exibirLivros();
+
+    limparTela();
 
     // Verifica se há registros de alterações
     if (numLogs == 0) {
@@ -432,23 +449,22 @@ void gerarRelatorioBibliotecario() {
     } else {
         // Exibe o histórico de alterações com datas e horas
         printf("\nHistórico de Alterações:\n\n");
-
         for (int i = 0; i < numLogs; i++) {
             // Converte o tempo para uma string legível
             char buffer[26];
             struct tm* tm_info;
-
             tm_info = localtime(&logs[i].dataAlteracao);
             strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);  // Formato de data e hora
 
             // Exibe os detalhes da alteração
+            printf("********************************************************\n");
             printf("Colaborador: %s\n", logs[i].colaborador);
             printf("Ação: %s\n", logs[i].acao);
-            printf("Data/Hora: %s\n", buffer);
+            printf("ID do Registro: %d\n", logs[i].idRegistro);
+            printf("Data/Hora: %s\n\n", buffer);
             printf("********************************************************\n");
         }
     }
-
     system("pause");
 }
 
@@ -621,22 +637,35 @@ void menu() {
 void cadastrarBibliotecario() {
     if (numBibliotecarios < MAX_BIBLIOTECARIOS) {
         Bibliotecario biblio;
-        biblio.id = numBibliotecarios + 1;
+        biblio.id = proximoIdBibliotecario++; // Atribui o próximo ID disponível e incrementa o contador
+
         printf("Nome do Bibliotecário: ");
         scanf(" %[^\n]", biblio.nome);
+
+        biblio.dataCriacao = time(NULL); // Registra a data e hora de criação
         bibliotecarios[numBibliotecarios++] = biblio;
-        printf("\nBibliotecário cadastrado com sucesso!\n");
+
+        printf("\nBibliotecário cadastrado com sucesso!\n\n");
+
+        // Exibe a data e hora de criação
+        char buffer[26];
+        struct tm* tm_info;
+        tm_info = localtime(&biblio.dataCriacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("Data de Criação: %s\n", buffer);
     } else {
-        printf("\nLimite de bibliotecários atingido!\n");
+        printf("\n\n ERRO, Limite de bibliotecários atingido!\n");
     }
     aguardar();
 }
 
+//Função que exibe os bibliotecarios
 void exibirBibliotecarios() {
     limparTela();
     printf("Bibliotecários cadastrados:\n\n");
     for (int i = 0; i < numBibliotecarios; i++) {
         printf("ID: %d | Nome: %s\n", bibliotecarios[i].id, bibliotecarios[i].nome);
+        printf("\n");
     }
     system("pause");
 }
@@ -649,38 +678,95 @@ void exibirBibliotecariosAtualizar() {
     }
 }
 
+
+// Função para atualizar bibliotecário
+// Função para atualizar bibliotecário
 void atualizarBibliotecario() {
-    exibirBibliotecariosAtualizar();
+    exibirBibliotecariosAtualizar();  // Exibe lista de bibliotecários para atualização
     int id;
     printf("\nDigite o ID do bibliotecário que deseja atualizar (0 para cancelar): ");
     scanf("%d", &id);
-    
+    getchar();  // Limpa o caractere '\n' do buffer
+
+    // Verifica se o ID é válido
     if (id > 0 && id <= numBibliotecarios) {
+        char nomeAntigo[50];
+        strcpy(nomeAntigo, bibliotecarios[id - 1].nome);  // Armazena o nome antigo para o log
+
+        // Atualização do nome
         printf("\nNovo nome do Bibliotecário: ");
         scanf(" %[^\n]", bibliotecarios[id - 1].nome);
-        printf("\n\nBibliotecário atualizado com sucesso!\n");
+
+        // Registra a data e hora da atualização
+        bibliotecarios[id - 1].dataAtualizacao = time(NULL);
+        printf("\nBibliotecário atualizado com sucesso!\n");
+
+        // Exibe a data e hora de atualização
+        char buffer[26];
+        struct tm *tm_info;
+        tm_info = localtime(&bibliotecarios[id - 1].dataAtualizacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("\nData de Atualização: %s\n", buffer);
+
+        // Registra a alteração no log
+        if (numLogs < MAX_LOGS) {
+            // Descrição da ação
+            snprintf(logs[numLogs].acao, sizeof(logs[numLogs].acao),
+                     "Nome alterado de '%s' para '%s'", nomeAntigo, bibliotecarios[id - 1].nome);
+
+            // Preenche as demais informações no log
+            strcpy(logs[numLogs].colaborador, bibliotecarios[id - 1].nome);  // Nome do bibliotecário atualizado
+            logs[numLogs].dataAlteracao = bibliotecarios[id - 1].dataAtualizacao;
+            logs[numLogs].idRegistro = bibliotecarios[id - 1].id;  // ID do bibliotecário
+
+            strcpy(logs[numLogs].delete, "");  // Não está deletando o usuário, deixa o campo vazio
+
+            numLogs++;  // Incrementa o contador de logs
+        } else {
+            printf("Limite de logs atingido!\n");
+        }
     } else {
         printf("\nBibliotecário não encontrado!\n");
     }
-    aguardar();
+    aguardar();  // Pausa para aguardar ação do usuário
 }
 
+
+
+//Função responsável por deletar os bibliotecarios. 
 void deletarBibliotecario() {
-    exibirBibliotecariosAtualizar();
+    exibirBibliotecariosAtualizar(); // Exibe os bibliotecários
+
     int id;
     printf("\nDigite o ID do bibliotecário que deseja deletar (0 para cancelar): ");
     scanf("%d", &id);
-    
+
     if (id > 0 && id <= numBibliotecarios) {
+        char nomeDeletado[50];
+        strcpy(nomeDeletado, bibliotecarios[id - 1].nome); // Armazena o bibliotecário a ser deletado
+
+        // Desloca todos os bibliotecários após o ID para a esquerda
         for (int i = id - 1; i < numBibliotecarios - 1; i++) {
             bibliotecarios[i] = bibliotecarios[i + 1];
         }
-        numBibliotecarios--;
-        printf("Bibliotecário deletado com sucesso!\n");
+        numBibliotecarios--; // Decrementa o número de bibliotecários
+
+        // Registra a alteração nos logs
+        time_t agora;
+        time(&agora);
+        char horaDeletado[26];
+        strftime(horaDeletado, sizeof(horaDeletado), "%Y-%m-%d %H:%M:%S", localtime(&agora));
+
+        char acao[150];
+        snprintf(acao, sizeof(acao), "'%s' deletado em %s\n", nomeDeletado, horaDeletado);
+        registrarAlteracao(nomeDeletado, "", acao); 
+
+        printf("\nBibliotecário deletado com sucesso!\n");
     } else {
         printf("\nBibliotecário não encontrado!\n");
         return;
     }
+
     aguardar();
 }
 
@@ -688,22 +774,35 @@ void deletarBibliotecario() {
 void cadastrarCliente() {
     if (numClientes < MAX_CLIENTES) {
         Cliente cli;
-        cli.id = numClientes + 1;
+        cli.id = proximoIdCliente++; // Atribui o próximo ID disponível e incrementa o contador
+
         printf("Nome do Cliente: ");
         scanf(" %[^\n]", cli.nome);
+
+        cli.dataCriacao = time(NULL); // Registra a data e hora de criação
         clientes[numClientes++] = cli;
+
         printf("\nCliente cadastrado com sucesso!\n");
+
+        // Exibe a data e hora de criação
+        char buffer[26];
+        struct tm* tm_info;
+        tm_info = localtime(&cli.dataCriacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("\nData de Criação: %s\n", buffer);
     } else {
-        printf("Limite de clientes atingido!\n");
+        printf("\n\nLimite de clientes atingido!\n");
     }
     aguardar();
 }
 
+//Função usada pra poder exibir os clientes
 void exibirClientes() {
     limparTela();
     printf("Clientes cadastrados:\n\n");
     for (int i = 0; i < numClientes; i++) {
-        printf("ID: %d | Nome: %s\n", clientes[i].id, clientes[i].nome);
+        printf("ID: %d | Nome: %s", clientes[i].id, clientes[i].nome);
+        printf("\n");
     }
     system("pause");
 }
@@ -721,18 +820,28 @@ void atualizarCliente() {
     int id;
     printf("\nDigite o ID do cliente que deseja atualizar (0 para cancelar): ");
     scanf("%d", &id);
-    
+
     if (id > 0 && id <= numClientes) {
-        printf("Novo nome do Cliente: ");
+        printf("\nNovo nome do Cliente: ");
         scanf(" %[^\n]", clientes[id - 1].nome);
-        printf("Cliente atualizado com sucesso!\n");
+        clientes[id - 1].dataAtualizacao = time(NULL);  // Registra a data e hora de atualização
+        printf("\nCliente atualizado com sucesso!\n");
+
+        // Exibe a data e hora de atualização
+        char buffer[26];
+        struct tm* tm_info;
+        tm_info = localtime(&clientes[id - 1].dataAtualizacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("\nData de Atualização: %s\n", buffer);
         aguardar();
+
     } else {
-        printf("Cliente não encontrado!\n");
+        printf("\nCliente não encontrado!\n");
         aguardar();
     }
     pausar();
 }
+
 
 void deletarCliente() {
     exibirClientesAtualizar();
@@ -757,20 +866,33 @@ void cadastrarLivro() {
     limparTela();
     if (numLivros < MAX_LIVROS) {
         Livro livro;
-        livro.id = numLivros + 1;
+        livro.id = proximoIdLivro++; // Atribui o próximo ID disponível e incrementa o contador
+
         printf("Título do Livro: ");
         scanf(" %[^\n]", livro.titulo);
+        
         printf("Autor do Livro: ");
         scanf(" %[^\n]", livro.autor);
+        
         livro.disponivel = 1;
+        livro.dataCriacao = time(NULL); // Registra a data e hora de criação
         livros[numLivros++] = livro;
+
         printf("\nLivro cadastrado com sucesso!\n");
+        aguardar();
+
+        // Exibe a data e hora de criação
+        char buffer[26];
+        struct tm* tm_info;
+        tm_info = localtime(&livro.dataCriacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("\nData de Criação: %s\n", buffer);
     } else {
         printf("\nLimite de livros atingido!\n");
     }
-    aguardar();
 }
-   
+
+//Função pra exibir os livros 
 void exibirLivros() {
     limparTela();
     
@@ -788,8 +910,8 @@ void exibirLivros() {
         printf("Digite o termo de busca: ");
         scanf(" %[^\n]", termoBusca);
     }
-    
-    printf("\nLivros cadastrados:\n\n");
+    limparTela();
+    printf("Livros cadastrados:\n\n");
     for (int i = 0; i < numLivros; i++) {
         int exibir = 1;
         switch(opcao) {
@@ -811,6 +933,7 @@ void exibirLivros() {
                 livros[i].id, livros[i].titulo, livros[i].autor, livros[i].disponivel ? "Sim" : "Não");
         }
     }
+    printf("\n");
     system("pause");
 }
 
@@ -842,23 +965,35 @@ void atualizarLivro() {
     int id;
     printf("\nDigite o ID do livro que deseja atualizar (0 para cancelar): ");
     scanf("%d", &id);
-    
+
     if (id > 0 && id <= numLivros) {
         printf("\nNovo título do Livro: ");
         scanf(" %[^\n]", livros[id - 1].titulo);
         printf("Novo autor do Livro: ");
         scanf(" %[^\n]", livros[id - 1].autor);
+        livros[id - 1].dataAtualizacao = time(NULL);  // Registra a data e hora de atualização
         printf("\nLivro atualizado com sucesso!\n");
+
+        // Exibe a data e hora de atualização
+        char buffer[26];
+        struct tm* tm_info;
+        tm_info = localtime(&livros[id - 1].dataAtualizacao);
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        printf("\nData de Atualização: %s\n", buffer);
+
+        aguardar();
+
     } else {
         printf("\nLivro não encontrado!\n");
     }
-    aguardar();
+    
 }
+
 
 void deletarLivro() {
     exibirLivrosAtualizar();
     int id;
-    printf("Digite o ID do livro que deseja deletar (0 para cancelar): ");
+    printf("\nDigite o ID do livro que deseja deletar (0 para cancelar): ");
     scanf("%d", &id);
     
     if (id > 0 && id <= numLivros) {
@@ -877,12 +1012,12 @@ void deletarLivro() {
 void emprestarLivro() {
     if (numEmprestimos < MAX_EMPRESTIMOS) {
         int idCliente, idLivro;
-        
+
         // Exibe clientes e livros disponíveis
         exibirClientesAtualizar();
         printf("\nDigite o ID do Cliente: ");
         scanf("%d", &idCliente);
-        
+
         exibirLivrosRetirar();
         printf("\nDigite o ID do Livro: ");
         scanf("%d", &idLivro);
@@ -891,23 +1026,27 @@ void emprestarLivro() {
         if (livros[idLivro - 1].disponivel) {
             // Registra o empréstimo
             Emprestimo emp;
-            emp.id = numEmprestimos + 1;
+            emp.id = proximoIdEmprestimo++; // Atribui o próximo ID disponível e incrementa o contador
             emp.idCliente = idCliente;
             emp.idLivro = idLivro;
-            emp.dataEmprestimo = time(NULL);  // Data atual
+            emp.dataEmprestimo = time(NULL); // Data atual
             emp.dataDevolucaoPrevista = emp.dataEmprestimo + (DIAS_LIMITE * 24 * 60 * 60);
-            
+
             // Marca o livro como indisponível
             livros[idLivro - 1].disponivel = 0;
             emprestimos[numEmprestimos++] = emp;
+
             printf("\nEmpréstimo registrado com sucesso!\n");
+            aguardar();
         } else {
-            printf("Livro não está disponível para empréstimo.\n");
+            printf("\nLivro não está disponível para empréstimo.\n");
+            aguardar();
         }
     } else {
-        printf("Limite de empréstimos atingido!\n");
+        printf("\nLimite de empréstimos atingido!\n");
+        aguardar();
     }
-    aguardar();
+   
 }
 
 void devolverLivro() {
@@ -1005,7 +1144,7 @@ void menuCliente() {
         printf("2. Exibir Clientes\n");
         printf("3. Atualizar Cliente\n");
         printf("4. Deletar Cliente\n");
-        printf("0. Voltar\n");
+        printf("0. Voltar\n\n");
         printf("Escolha uma opção: ");
 
         if (scanf("%d", &opcao) != 1) {
