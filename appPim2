@@ -14,31 +14,63 @@
 #define MAX_LOGS 100 
 
 // Declaração de funções
-void limparTela();
-void ocultarSenha(char *senha);
-int loginAdmin();
-int loginColaborador();
-void cadastrarColaborador();
-void exibirColaboradores();
-void exibirLivros();
-void exibirClientes();
-void atualizarColaborador();
-void deletarColaborador();
-void menu();
-void menuLogin();
-void menuBibliotecario();
-void menuCliente();
-void menuLivro();
-void emprestarLivro();
-void devolverLivro();
+void limparTela(); //Limpa a tela.
+void ocultarSenha(); //Oculta a senha.
+void pausar(); // Pausa a tela.
+int cpfJaCadastrado(); // Verifica se o cpf está cadastrado.
+void cadastrarColaborador(); // Cadastra os colaboradores.
+void registrarAlteracao(); // Salva as alterações em Logs.
+void exibirColaboradores(); // Exibe os clientes cadastrados.
+void exibirColaboradoresAtualizar(); // exibe os colaboradores cadastrados no Log.
+int validarSenhaNumerica(); // Valida se a senha contém apenas números
+void atualizarColaborador(); // Atualzia o colaborador do vetor.
+void deletarColaborador(); // Deleta o colaborador do vetor.
+void aguardar(); // Aguarda 2 segundos antes de continuar.
+int loginColaborador(); // Entra com o Login do colaborador
+int loginAdmin(); // Entra com o menu ADM
+void esperarTecla(); // Espera o usuário apertar uma tecla pra prosseguir.
+void gerarRelatorioBibliotecario(); // Gera um relatório para o bibliotecário referente as alterações e cadastros que foram feitos.
+void exibirRelatorioAdm(); // Exibe usuários que foram alterados / deletados  e a hora. 
+void menuLogin(); // Responsável por escolher se vai entrar com o ADM ou com o colaborador. 
+void menuAdm(); // Menu do ADM.
+void menu(); // Lista com os menus.
+void cadastrarBibliotecario(); // Cadastra os bibliotecários.
+void exibirBibliotecarios(); //Exibe os bibliotecários cadastrados. 
+void exibirBibliotecariosAtualizar(); // Exibe a lista dos bibliotecários. 
+void atualizarBibliotecario(); // Atualiza o bibliotecário. 
+void deletarBibliotecario(); // Deleta o bibliotecário.
+void cadastrarCliente(); // Cadastra os clientes.
+void exibirClientes(); // Lista os clientes cadastrados.
+void exibirClientesAtualizar(); // Lista os clientes para o Log.
+void atualizarCliente(); // Atualzia o cliente.
+void deletarCliente(); //Deleta o cliente.
+void cadastrarLivro(); // Cadastra livros.
+void exibirLivros(); // Exibe todos os livros cadastrados. 
+void exibirLivrosAtualizar(); //Exibe os livros para o Log.
+void exibirLivrosRetirar(); // Exibe os livros retirar.
+void atualizarLivro(); // Atualiza os livros.
+void deletarLivro(); // Deleta um livro cadastrado.
+void emprestarLivro(); // Empresta o livro (aluga).
+void devolverLivro(); // Faz a devolução do livro deixando ele disponível novamente.
+void menuBibliotecario(); // Exibe o menu do bibliotecário.
+void menuCliente(); // Exibe o menu do cliente. 
+void menuLivro(); // Exibe o menu dos livros.
 
-// Estruturas de dados
+
+/*todas as funções que contém a palavra atualuzar exemplo: exibirColaboradoresAtualizar, tem uma trataviva para ser
+apresentada no relatório, pois durante a criação das funções foi inserido system("pause"), ou aguardar(); para ter a interação com usuário.
+*/
+
+
+// Estruturas de dados, vetores que armazenam as informações digitadas. 
 typedef struct {
     int id;
     char nome[50];
     char senha[20];
+    char cpf[12];  
     time_t dataCriacao;
 } Colaborador;
+
 
 typedef struct {
     int id;
@@ -113,6 +145,7 @@ void limparTela() {
     #endif
 }
 
+// Oculta a senha 
 void ocultarSenha(char *senha) {
     int i = 0;
     char ch;
@@ -131,9 +164,22 @@ void ocultarSenha(char *senha) {
     senha[i] = '\0';  // Finaliza a string
 }
 
+
+//Pausa a tela
 void pausar() {
     printf("Pressione Enter para continuar...");
     getchar();  // Espera por um Enter (captura a nova linha)
+}
+
+
+// Função para verificar se o CPF já está cadastrado
+int cpfJaCadastrado(const char *cpf) {
+    for (int i = 0; i < numColaboradores; i++) {
+        if (strcmp(colaboradores[i].cpf, cpf) == 0) {
+            return 1; // CPF encontrado
+        }
+    }
+    return 0; // CPF não encontrado
 }
 
 
@@ -147,6 +193,33 @@ void cadastrarColaborador() {
         printf("Nome do Colaborador: ");
         scanf(" %[^\n]", colaborador.nome);
         getchar();  // Limpa o caractere '\n' do buffer
+
+        // Solicita o CPF do colaborador
+        printf("Digite o CPF (apenas números): ");
+        scanf("%s", colaborador.cpf);
+
+        // Verifica se o CPF contém exatamente 11 dígitos
+        if (strlen(colaborador.cpf) != 11) {
+            printf("\nO CPF deve conter exatamente 11 dígitos. Tente novamente!\n");
+            aguardar();
+            return;
+        }
+
+        // Verifica se todos os caracteres do CPF são numéricos
+        for (int i = 0; i < 11; i++) {
+            if (!isdigit(colaborador.cpf[i])) {
+                printf("\nO CPF deve conter apenas números. Tente novamente!\n");
+                aguardar();
+                return;
+            }
+        }
+
+        // Verifica se o CPF já está cadastrado
+        if (cpfJaCadastrado(colaborador.cpf)) {
+            printf("\nERRO, O CPF informado já está cadastrado.\n");
+            aguardar();
+            return;
+        }
 
         printf("Insira uma senha de 4 dígitos para o usuário: ");
         ocultarSenha(colaborador.senha);  // Oculta a digitação da senha
@@ -187,6 +260,7 @@ void cadastrarColaborador() {
     aguardar();
 }
 
+//Salva a alteração para ser exibida em um Log.
 void registrarAlteracao(char nome[], char novaSenha[], const char* acao) {
     if (numLogs < MAX_LOGS) {
         // Cria um novo log de alteração
@@ -211,6 +285,7 @@ void exibirColaboradores() {
     system("pause");
 }
 
+// Lista os colaboradores no menu de atualizar
 void exibirColaboradoresAtualizar() {
     //limparTela();
     printf("Colaboradores cadastrados:\n\n");
@@ -237,6 +312,7 @@ int validarSenhaNumerica(char *senha) {
 }
 
 
+// Atualiza os colaboradores
 void atualizarColaborador() {
     exibirColaboradoresAtualizar();
     int id;
@@ -419,6 +495,7 @@ int loginAdmin() {
 }
 }
 
+
 //função pra esperar a tecla.
 void esperarTecla() {
     printf("\n\nEntrando...\n");
@@ -426,12 +503,6 @@ void esperarTecla() {
     limparTela();
 }
 
-void gerarRelatorio() {
-    printf("Relatorio de todos os registros:\n");
-    exibirLivros();
-    exibirClientes();
-    
-}
 
 //Função para gerar o relatório dos Bibliotecarios. 
 void gerarRelatorioBibliotecario() {
@@ -468,7 +539,7 @@ void gerarRelatorioBibliotecario() {
     system("pause");
 }
 
-
+// Gera o relatório do Administrador
 void exibirRelatorioAdm() {
     printf("Relatório de alterações dos usuários:\n\n");
     if (numLogs == 0) {
@@ -490,6 +561,8 @@ void exibirRelatorioAdm() {
 
     system("pause");
 }
+
+// Exibe as opções para entrar com o usuário adm ou com o do colaborador
 void menuLogin() {
     int opcao;
     do {
@@ -532,6 +605,7 @@ void menuLogin() {
     } while (opcao != 0);
 }
 
+// Lista o menu adm
 void menuAdm() {
     int escolha;
     do {
@@ -670,6 +744,8 @@ void exibirBibliotecarios() {
     system("pause");
 }
 
+
+// Lista os bibliotecários para atualizar
 void exibirBibliotecariosAtualizar() {
     limparTela();
     printf("Bibliotecários cadastrados:\n\n");
@@ -677,7 +753,6 @@ void exibirBibliotecariosAtualizar() {
         printf("ID: %d | Nome: %s\n", bibliotecarios[i].id, bibliotecarios[i].nome);
     }
 }
-
 
 
 // Função para atualizar bibliotecário
@@ -807,6 +882,7 @@ void exibirClientes() {
     system("pause");
 }
 
+// Lista os clientes para atualizar
 void exibirClientesAtualizar() {
     limparTela();
     printf("Clientes cadastrados:\n\n");
@@ -815,6 +891,7 @@ void exibirClientesAtualizar() {
     }
 }
 
+// Atualiza os clientes 
 void atualizarCliente() {
     exibirClientesAtualizar();
     int id;
@@ -842,7 +919,7 @@ void atualizarCliente() {
     pausar();
 }
 
-
+// Deleta os clientes
 void deletarCliente() {
     exibirClientesAtualizar();
     int id;
@@ -937,7 +1014,7 @@ void exibirLivros() {
     system("pause");
 }
 
-
+// Lista os livros para atualizar
 void exibirLivrosAtualizar() {
 
     limparTela();
@@ -949,6 +1026,7 @@ void exibirLivrosAtualizar() {
     //system("pause");
 }
 
+// Exibe os livros para alugar
 void exibirLivrosRetirar() {
 
     limparTela();
@@ -960,6 +1038,7 @@ void exibirLivrosRetirar() {
     
 }
 
+// Atualiza os livros
 void atualizarLivro() {
     exibirLivrosAtualizar();
     int id;
@@ -989,7 +1068,7 @@ void atualizarLivro() {
     
 }
 
-
+// Função CRUD para deletar os livros
 void deletarLivro() {
     exibirLivrosAtualizar();
     int id;
@@ -1007,6 +1086,7 @@ void deletarLivro() {
     }
     aguardar();
 }
+
 
 // Funções para empréstimos e devoluções
 void emprestarLivro() {
@@ -1049,6 +1129,8 @@ void emprestarLivro() {
    
 }
 
+
+// Faz a devolução dos livros
 void devolverLivro() {
     limparTela();
     exibirLivrosRetirar();  // Exibe os livros retirados e seus IDs de empréstimo
