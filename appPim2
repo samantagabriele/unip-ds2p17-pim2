@@ -14,47 +14,47 @@
 #define MAX_LOGS 100 
 
 // Declaração de funções
-void limparTela(); 
-void ocultarSenha(); 
-void pausar(); 
-int cpfJaCadastrado(); 
-void cadastrarColaborador();
-void registrarAlteracao(); 
-void exibirColaboradores(); 
-void exibirColaboradoresAtualizar(); 
-int validarSenhaNumerica(); 
-void atualizarColaborador(); 
-void deletarColaborador(); 
-void aguardar(); 
-int loginColaborador(); 
-int loginAdmin(); 
-void esperarTecla(); 
-void gerarRelatorioBibliotecario(); 
-void exibirRelatorioAdm(); 
-void menuLogin(); 
-void menuAdm(); 
-void menu(); 
-void cadastrarBibliotecario(); 
-void exibirBibliotecarios(); 
-void exibirBibliotecariosAtualizar(); 
-void atualizarBibliotecario(); 
-void deletarBibliotecario(); 
-void cadastrarCliente(); 
-void exibirClientes(); 
-void exibirClientesAtualizar(); 
-void atualizarCliente(); 
-void deletarCliente(); 
-void cadastrarLivro(); 
-void exibirLivros();  
-void exibirLivrosAtualizar(); 
-void exibirLivrosRetirar(); 
-void atualizarLivro(); 
-void deletarLivro(); 
-void emprestarLivro(); 
-void devolverLivro(); 
-void menuBibliotecario(); 
-void menuCliente(); 
-void menuLivro(); 
+void limparTela(); //Limpa a tela.
+void ocultarSenha(); //Oculta a senha.
+void pausar(); // Pausa a tela.
+int cpfJaCadastrado(); // Verifica se o cpf está cadastrado.
+void cadastrarColaborador(); // Cadastra os colaboradores.
+void registrarAlteracao(); // Salva as alterações em Logs.
+void exibirColaboradores(); // Exibe os clientes cadastrados.
+void exibirColaboradoresAtualizar(); // exibe os colaboradores cadastrados no Log.
+int validarSenhaNumerica(); // Valida se a senha contém apenas números
+void atualizarColaborador(); // Atualzia o colaborador do vetor.
+void deletarColaborador(); // Deleta o colaborador do vetor.
+void aguardar(); // Aguarda 2 segundos antes de continuar.
+int loginColaborador(); // Entra com o Login do colaborador
+int loginAdmin(); // Entra com o menu ADM
+void esperarTecla(); // Espera o usuário apertar uma tecla pra prosseguir.
+void gerarRelatorioBibliotecario(); // Gera um relatório para o bibliotecário referente as alterações e cadastros que foram feitos.
+void exibirRelatorioAdm(); // Exibe usuários que foram alterados / deletados  e a hora. 
+void menuLogin(); // Responsável por escolher se vai entrar com o ADM ou com o colaborador. 
+void menuAdm(); // Menu do ADM.
+void menu(); // Lista com os menus.
+void cadastrarBibliotecario(); // Cadastra os bibliotecários.
+void exibirBibliotecarios(); //Exibe os bibliotecários cadastrados. 
+void exibirBibliotecariosAtualizar(); // Exibe a lista dos bibliotecários. 
+void atualizarBibliotecario(); // Atualiza o bibliotecário. 
+void deletarBibliotecario(); // Deleta o bibliotecário.
+void cadastrarCliente(); // Cadastra os clientes.
+void exibirClientes(); // Lista os clientes cadastrados.
+void exibirClientesAtualizar(); // Lista os clientes para o Log.
+void atualizarCliente(); // Atualzia o cliente.
+void deletarCliente(); //Deleta o cliente.
+void cadastrarLivro(); // Cadastra livros.
+void exibirLivros(); // Exibe todos os livros cadastrados. 
+void exibirLivrosAtualizar(); //Exibe os livros para o Log.
+void exibirLivrosRetirar(); // Exibe os livros retirar.
+void atualizarLivro(); // Atualiza os livros.
+void deletarLivro(); // Deleta um livro cadastrado.
+void emprestarLivro(); // Empresta o livro (aluga).
+void devolverLivro(); // Faz a devolução do livro deixando ele disponível novamente.
+void menuBibliotecario(); // Exibe o menu do bibliotecário.
+void menuCliente(); // Exibe o menu do cliente. 
+void menuLivro(); // Exibe o menu dos livros.
 
 
 /*todas as funções que contém a palavra atualuzar exemplo: exibirColaboradoresAtualizar, tem uma trataviva para ser
