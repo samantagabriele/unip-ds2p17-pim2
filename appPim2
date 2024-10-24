@@ -16,7 +16,6 @@
 // Declaração de funções
 void limparTela(); //Limpa a tela.
 void ocultarSenha(); //Oculta a senha.
-void pausar(); // Pausa a tela.
 int cpfJaCadastrado(); // Verifica se o cpf está cadastrado.
 void cadastrarColaborador(); // Cadastra os colaboradores.
 void registrarAlteracao(); // Salva as alterações em Logs.
@@ -162,13 +161,6 @@ void ocultarSenha(char *senha) {
     }
 
     senha[i] = '\0';  
-}
-
-
-//Pausa a tela
-void pausar() {
-    printf("Pressione Enter para continuar...");
-    getchar();  // Espera por um Enter (captura a nova linha)
 }
 
 
