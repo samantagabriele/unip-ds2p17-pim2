@@ -56,10 +56,10 @@ void menuBibliotecario(); // Exibe o menu do bibliotecário.
 void menuCliente(); // Exibe o menu do cliente. 
 void menuLivro(); // Exibe o menu dos livros.
 
-
-/*todas as funções que contém a palavra atualuzar exemplo: exibirColaboradoresAtualizar, tem uma trataviva para ser
-apresentada no relatório, pois durante a criação das funções foi inserido system("pause"), ou aguardar(); para ter a interação com usuário.
-*/
+/************************************************************************************************************************************************
+*   todas as funções que contém a palavra atualuzar exemplo: exibirColaboradoresAtualizar, tem uma trataviva para ser                           *
+*   apresentada no relatório, pois durante a criação das funções foi inserido system("pause"), ou aguardar(); para ter a interação com usuário. *
+**************************************************************************************************************************************************/
 
 
 // Estruturas de dados, vetores que armazenam as informações digitadas. 
@@ -105,10 +105,10 @@ typedef struct {
 
 typedef struct {
     char colaborador[50];
-    char senha[50]; // Armazene a senha de forma segura em produção!
-    char acao[100]; // Descrição da ação realizada
-    char delete[100]; //Deletaq o usuário
-    time_t dataAlteracao; // Data e hora da alteração
+    char senha[50]; 
+    char acao[100]; 
+    char delete[100]; 
+    time_t dataAlteracao; 
     int idRegistro;
 } LogAlteracao;
 
@@ -161,7 +161,7 @@ void ocultarSenha(char *senha) {
         }
     }
 
-    senha[i] = '\0';  // Finaliza a string
+    senha[i] = '\0';  
 }
 
 
@@ -363,23 +363,26 @@ void atualizarColaborador() {
         }
 
         // Verifica se a nova senha é diferente da antiga
-        if (strcmp(novaSenha, "") != 0 && strcmp(senhaAntiga, novaSenha) != 0) {
+        if (strcmp(novaSenha, "") == 0 || strcmp(senhaAntiga, novaSenha) == 0) {
+            printf("\n\nA nova senha não pode ser igual à antiga ou vazia.\n");
+            aguardar();
+            return;  // Retorna imediatamente, impedindo a continuação da função
+        } else {
             strcpy(colaboradores[id - 1].senha, novaSenha);
             char acaoSenha[100];
             snprintf(acaoSenha, sizeof(acaoSenha), "Senha alterada!\n");
             registrarAlteracao(nomeAntigo, novaSenha, acaoSenha);
-        } else {
-            printf("\nA nova senha não pode ser igual à antiga ou vazia.\n");
         }
 
-        printf("\nColaborador atualizado com sucesso!\n");
+        printf("\n\nColaborador atualizado com sucesso!\n");
     } else {
-        printf("\nColaborador não encontrado!\n");
+        printf("\n\nColaborador não encontrado!\n");
         return;
     }
 
     aguardar();
 }
+
 
 //Função responsável por deletar os colaboradores.
 void deletarColaborador() {
@@ -418,7 +421,7 @@ void deletarColaborador() {
 }
 
 
-//Função que faz esperar 2 segundos antes de seguir
+// Função que faz esperar 2 segundos antes de seguir
 void aguardar() {
     _sleep(2000); 
     limparTela();
@@ -543,8 +546,8 @@ void gerarRelatorioBibliotecario() {
 void exibirRelatorioAdm() {
     printf("Relatório de alterações dos usuários:\n\n");
     if (numLogs == 0) {
-        printf("Nenhuma alteração registrada.\n");
-        pausar();
+        printf("Nenhuma alteração registrada.\n\n");
+        system("pause");
         return;
     }
 
@@ -916,7 +919,7 @@ void atualizarCliente() {
         printf("\nCliente não encontrado!\n");
         aguardar();
     }
-    pausar();
+    
 }
 
 // Deleta os clientes
