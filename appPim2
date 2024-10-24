@@ -208,7 +208,7 @@ void cadastrarColaborador() {
 
         // Verifica se o CPF já está cadastrado
         if (cpfJaCadastrado(colaborador.cpf)) {
-            printf("\nERRO, O CPF informado já está cadastrado.\n");
+            printf("\nO CPF já cadastrado.\n");
             aguardar();
             return;
         }
