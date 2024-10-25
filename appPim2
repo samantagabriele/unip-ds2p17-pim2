@@ -349,7 +349,7 @@ void atualizarColaborador() {
         
         // Validação da nova senha
         if (!validarSenhaNumerica(novaSenha)) {
-            printf("\nErro: A senha deve conter exatamente 4 dígitos numéricos.\n");
+            printf("\nA senha deve conter exatamente 4 dígitos numéricos.\n");
             aguardar();
             return;
         }
@@ -723,7 +723,7 @@ void cadastrarBibliotecario() {
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
         printf("Data de Criação: %s\n", buffer);
     } else {
-        printf("\n\n ERRO, Limite de bibliotecários atingido!\n");
+        printf("\n\nLimite de bibliotecários atingido!\n");
     }
     aguardar();
 }
