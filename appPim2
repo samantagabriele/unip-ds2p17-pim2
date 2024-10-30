@@ -13,6 +13,7 @@
 #define DIAS_LIMITE 7 // Limite de dias de empréstimo
 #define MAX_LOGS 100 
 
+
 // Declaração de funções
 void limparTela(); //Limpa a tela.
 void ocultarSenha(); //Oculta a senha.
@@ -349,7 +350,7 @@ void atualizarColaborador() {
         
         // Validação da nova senha
         if (!validarSenhaNumerica(novaSenha)) {
-            printf("\nA senha deve conter exatamente 4 dígitos numéricos.\n");
+            printf("\nErro: A senha deve conter exatamente 4 dígitos numéricos.\n");
             aguardar();
             return;
         }
@@ -381,7 +382,7 @@ void deletarColaborador() {
     exibirColaboradoresAtualizar(); // Exibe os colaboradores
 
     int id;
-    printf("\nDigite o ID do colaborador que deseja deletar (0 para cancelar): ");
+    printf("\nDigite o ID do colaborador que deseja deletar (0 para cancelar): \n\n");
     scanf("%d", &id);
 
     if (id > 0 && id <= numColaboradores) {
@@ -398,15 +399,22 @@ void deletarColaborador() {
         time_t agora;
         time(&agora);
         char horaDeletado[26];
-        strftime(horaDeletado, sizeof(horaDeletado), "%Y-%m-%d %H:%M:%S", localtime(&agora));
+        //strftime(horaDeletado, sizeof(horaDeletado), "%Y-%m-%d %H:%M:%S", localtime(&agora));
+        strftime(horaDeletado, sizeof(horaDeletado), "%d-%m-%Y %H:%M", localtime(&agora));
 
         char acao[150];
         snprintf(acao, sizeof(acao), "'%s' deletado em %s\n", nomeDeletado, horaDeletado);
-        registrarAlteracao(nomeDeletado, "", acao); // Registra a ação de deletar
+        registrarAlteracao(nomeDeletado, "", acao); // Registra a ação de deletar  
 
         printf("\nColaborador deletado com sucesso!\n");
-    } else {
-        printf("Colaborador não encontrado!\n");
+    } 
+    else if( id == 0) 
+        {
+         printf("\nOperação cancelada. Nenhum colaborador foi excluído.\n");
+        }
+    else 
+    {
+        printf("Colaborador não encontrado. Verifique o nome ou ID e tente novamente.");
     }
 
     aguardar();
@@ -438,7 +446,7 @@ int loginColaborador() {
                 char buffer[26];
                 struct tm* tm_info;
                 tm_info = localtime(&agora);
-                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+                strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
 
                 printf("\n\nLogin realizado com sucesso!\n\n");
                 printf("Data e Hora de Autenticação: %s\n", buffer);
@@ -520,7 +528,7 @@ void gerarRelatorioBibliotecario() {
             char buffer[26];
             struct tm* tm_info;
             tm_info = localtime(&logs[i].dataAlteracao);
-            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);  // Formato de data e hora
+            strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
 
             // Exibe os detalhes da alteração
             printf("********************************************************\n");
@@ -549,7 +557,8 @@ void exibirRelatorioAdm() {
         struct tm* tm_info;
 
         tm_info = localtime(&logs[i].dataAlteracao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        // Formato: dia-mes-ano hora:minuto
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("Colaborador: %s \nAção: %sData/Hora: %s\n", logs[i].colaborador, logs[i].acao, buffer);
         printf("********************************************************\n");
     }
@@ -720,10 +729,10 @@ void cadastrarBibliotecario() {
         char buffer[26];
         struct tm* tm_info;
         tm_info = localtime(&biblio.dataCriacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("Data de Criação: %s\n", buffer);
     } else {
-        printf("\n\nLimite de bibliotecários atingido!\n");
+        printf("\n\n ERRO, Limite de bibliotecários atingido!\n");
     }
     aguardar();
 }
@@ -775,7 +784,7 @@ void atualizarBibliotecario() {
         char buffer[26];
         struct tm *tm_info;
         tm_info = localtime(&bibliotecarios[id - 1].dataAtualizacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("\nData de Atualização: %s\n", buffer);
 
         // Registra a alteração no log
@@ -825,7 +834,7 @@ void deletarBibliotecario() {
         time_t agora;
         time(&agora);
         char horaDeletado[26];
-        strftime(horaDeletado, sizeof(horaDeletado), "%Y-%m-%d %H:%M:%S", localtime(&agora));
+        strftime(horaDeletado, sizeof(horaDeletado), "%d-%m-%Y %H:%M", localtime(&agora));
 
         char acao[150];
         snprintf(acao, sizeof(acao), "'%s' deletado em %s\n", nomeDeletado, horaDeletado);
@@ -858,7 +867,7 @@ void cadastrarCliente() {
         char buffer[26];
         struct tm* tm_info;
         tm_info = localtime(&cli.dataCriacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("\nData de Criação: %s\n", buffer);
     } else {
         printf("\n\nLimite de clientes atingido!\n");
@@ -903,7 +912,7 @@ void atualizarCliente() {
         char buffer[26];
         struct tm* tm_info;
         tm_info = localtime(&clientes[id - 1].dataAtualizacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("\nData de Atualização: %s\n", buffer);
         aguardar();
 
@@ -957,7 +966,7 @@ void cadastrarLivro() {
         char buffer[26];
         struct tm* tm_info;
         tm_info = localtime(&livro.dataCriacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("\nData de Criação: %s\n", buffer);
     } else {
         printf("\nLimite de livros atingido!\n");
@@ -1052,7 +1061,7 @@ void atualizarLivro() {
         char buffer[26];
         struct tm* tm_info;
         tm_info = localtime(&livros[id - 1].dataAtualizacao);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M", tm_info);
         printf("\nData de Atualização: %s\n", buffer);
 
         aguardar();
