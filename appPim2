@@ -975,48 +975,74 @@ void cadastrarLivro() {
 
 //Função pra exibir os livros 
 void exibirLivros() {
-    limparTela();
-    
     int opcao;
     char termoBusca[100];
-    printf("Escolha uma opção de filtro:\n");
-    printf("1. Título:\n");
-    printf("2. Autor:\n");
-    printf("3. Disponibilidade:\n");
-    printf("4. Sem Filtro\n");
-    printf("\nDigite sua opção: ");
-    scanf("%d", &opcao);
-    
-    if (opcao != 4) {
-        printf("Digite o termo de busca: ");
-        scanf(" %[^\n]", termoBusca);
-    }
-    limparTela();
-    printf("Livros cadastrados:\n\n");
-    for (int i = 0; i < numLivros; i++) {
-        int exibir = 1;
-        switch(opcao) {
-            case 1:
-                if (strstr(livros[i].titulo, termoBusca) == NULL) exibir = 0;
-                break;
-            case 2:
-                if (strstr(livros[i].autor, termoBusca) == NULL) exibir = 0;
-                break;
-            case 3:
-                if ((strcmp(termoBusca, "Sim") == 0 && !livros[i].disponivel) ||
-                    (strcmp(termoBusca, "Não") == 0 && livros[i].disponivel)) exibir = 0;
-                break;
-            default:
-                break;
+
+    while (1) { 
+        limparTela();
+        printf("Escolha uma opção de filtro:\n");
+        printf("1. Título\n");
+        printf("2. Autor\n");
+        printf("3. Disponibilidade\n");
+        printf("4. Sem Filtro\n");
+        printf("0. Cancelar\n");
+        printf("\nDigite sua opção: ");
+        scanf("%d", &opcao);
+        
+        if (opcao == 0) {
+            return; // Retorna ao menu anterior
         }
-        if (exibir) {
-            printf("ID: %d | Título: %s | Autor: %s | Disponível: %s\n", 
-                livros[i].id, livros[i].titulo, livros[i].autor, livros[i].disponivel ? "Sim" : "Não");
+        
+        // Se a opção for inválida, notifica e volta ao início do loop
+        if (opcao < 0 || opcao > 4) {
+            printf("Opção inválida! Tente novamente.\n");
+            system("pause");
+            continue; 
         }
+
+        // Se a opção não for 4, solicita o termo de busca
+        if (opcao != 4) {
+            printf("Digite o termo de busca: ");
+            scanf(" %[^\n]", termoBusca);
+        } else {
+            termoBusca[0] = '\0'; // Termo vazio para sem filtro
+        }
+
+        limparTela();
+        printf("Livros cadastrados:\n\n");
+        
+        // Exibe os livros de acordo com a opção selecionada
+        for (int i = 0; i < numLivros; i++) {
+            int exibir = 1;
+            switch (opcao) {
+                case 1:
+                    if (strstr(livros[i].titulo, termoBusca) == NULL) exibir = 0;
+                    break;
+                case 2:
+                    if (strstr(livros[i].autor, termoBusca) == NULL) exibir = 0;
+                    break;
+                case 3:
+                    if ((strcmp(termoBusca, "Sim") == 0 && !livros[i].disponivel) ||
+                        (strcmp(termoBusca, "Não") == 0 && livros[i].disponivel)) exibir = 0;
+                    break;
+                case 4:
+                    // Sem filtro, exibe todos os livros
+                    break;
+                default:
+                    break;
+            }
+            if (exibir) {
+                printf("ID: %d | Título: %s | Autor: %s | Disponível: %s\n", 
+                    livros[i].id, livros[i].titulo, livros[i].autor, livros[i].disponivel ? "Sim" : "Não");
+            }
+        }
+
+        printf("\n");
+        system("pause"); // Pausa antes de voltar ao menu
     }
-    printf("\n");
-    system("pause");
 }
+
+
 
 // Lista os livros para atualizar
 void exibirLivrosAtualizar() {
